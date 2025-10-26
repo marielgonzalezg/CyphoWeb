@@ -8,7 +8,7 @@ export async function login(email: string, password: string) {
   const emailNorm = email.trim().toLowerCase();
   const { data: users, error } = await supabase
     .from('usuarios')
-    .select('correo, contrasena')
+    .select('id_usuario, correo, contrasena')
     .eq('correo', emailNorm) 
     .limit(1);
 
@@ -24,7 +24,7 @@ export async function login(email: string, password: string) {
   }
 
   console.log(`✅ Login exitoso: ${user.correo}`);
-  return { success: true, message: "Login exitoso" };
+  return { success: true, id: user.id_usuario, correo: user.correo, message: "Login exitoso" };
 
 }
 

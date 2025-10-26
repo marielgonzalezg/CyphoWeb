@@ -13,6 +13,7 @@ export default function Home() {
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Aprende, Invierte y Diviértete
           </h1>
+          
           <p className="text-xl text-gray-600 mb-10">
             Toma el primer paso hacia tu libertad financiera.
           </p>

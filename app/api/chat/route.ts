@@ -1,36 +1,89 @@
 // app/api/chat/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { ClaudeWithMCP } from '../../lib/claude-client';
+
+const MCP_CHAT_URL = 'https://mcpclient-uafb.onrender.com/chat';
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages } = await request.json();
+    const body = await request.json();
+    const prompt =
+      typeof body?.prompt === 'string' ? body.prompt.trim() : '';
+    const userId = '1';
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!prompt) {
       return NextResponse.json(
-        { error: 'Se requiere un array de mensajes' },
+        { error: 'Favor de escribir un mensaje.' },
         { status: 400 }
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    const mcpUrl = process.env.MCP_SERVER_URL;
+    const upstreamResponse = await fetch(
+      `${MCP_CHAT_URL}?user_id=${encodeURIComponent(userId)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+        cache: 'no-store',
+      }
+    );
 
-    if (!apiKey || !mcpUrl) {
+    const rawText = await upstreamResponse.text();
+
+    if (!upstreamResponse.ok) {
+      let errorMessage = rawText.trim();
+      try {
+        const parsedError = JSON.parse(rawText);
+        if (
+          parsedError &&
+          typeof parsedError === 'object' &&
+          typeof parsedError.error === 'string'
+        ) {
+          errorMessage = parsedError.error;
+        }
+      } catch {
+        // noop - keep original text
+      }
+
       return NextResponse.json(
-        { error: 'Configuración incompleta del servidor' },
-        { status: 500 }
+        {
+          error:
+            errorMessage ||
+            'Error recibido del servicio de conversación externo.',
+        },
+        { status: upstreamResponse.status || 502 }
       );
     }
 
-    // Crear cliente de Claude con MCP
-    const claude = new ClaudeWithMCP(apiKey, mcpUrl);
-    await claude.initialize();
+    let assistantReply = rawText.trim();
 
-    // Obtener respuesta
-    const response = await claude.chat(messages);
+    try {
+      const parsedResponse = JSON.parse(rawText);
+      if (
+        parsedResponse &&
+        typeof parsedResponse === 'object' &&
+        typeof parsedResponse.response === 'string'
+      ) {
+        assistantReply = parsedResponse.response;
+      } else if (
+        parsedResponse &&
+        typeof parsedResponse === 'object' &&
+        typeof parsedResponse.message === 'string'
+      ) {
+        assistantReply = parsedResponse.message;
+      } else if (
+        parsedResponse &&
+        typeof parsedResponse === 'object' &&
+        typeof parsedResponse.reply === 'string'
+      ) {
+        assistantReply = parsedResponse.reply;
+      }
+    } catch {
+      // noop - keep raw text
+    }
 
-    return NextResponse.json({ response });
+    return NextResponse.json({ response: assistantReply });
   } catch (error) {
     console.error('Error en chat:', error);
     return NextResponse.json(
@@ -39,4 +92,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

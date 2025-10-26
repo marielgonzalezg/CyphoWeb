@@ -26,26 +26,23 @@ export default function ChatPage() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.trim();
+    const prompt = input.trim();
     setInput("");
 
     // Agregar mensaje del usuario
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setMessages((prev) => [...prev, { role: "user", content: prompt }]);
     setIsLoading(true);
 
     try {
-      console.log("[CLIENT] Enviando mensaje:", userMessage);
+      console.log("[CLIENT] Enviando mensaje:", prompt);
       console.log("[CLIENT] URL:", "/api/chat");
-      console.log("[CLIENT] Historial:", messages.length, "mensajes");
-
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: userMessage,
-          history: messages.slice(-6),
+          prompt,
         }),
       });
 
@@ -72,9 +69,14 @@ export default function ChatPage() {
       }
 
       // Agregar respuesta del asistente
+      const assistantReply =
+        typeof data?.response === "string"
+          ? data.response
+          : responseText;
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.response },
+        { role: "assistant", content: assistantReply },
       ]);
 
     } catch (error: any) {
@@ -102,9 +104,9 @@ export default function ChatPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                AI Assistant
+                Coach Financiero
               </h1>
-              <p className="text-sm text-gray-500">Powered by NVIDIA Nemotron</p>
+              <p className="text-sm text-gray-500">Powered by MCP</p>
             </div>
           </div>
         </div>

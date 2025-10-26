@@ -1,41 +1,81 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
+
+
+  const navItems = [
+    { href: "/", label: "Inicio" },
+    { href: "/metas", label: "Metas" },
+    { href: "/gastos", label: "Monitoreo Gastos" },
+    { href: "/ChatBot", label: "ChatBot" },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold">B</span>
-          </div>
-          <span className="text-2xl font-bold text-gray-800">BANORTE</span>
-        </div>
-
-        <div className="hidden md:flex items-center space-x-2">
-          <button className="px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
-            Home Screen
-          </button>
-          <button className="px-6 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-            Metas
-          </button>
-          <button className="px-6 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-            Monitoreo Gastos
-          </button>
-          <button className="px-6 py-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-            Chequeo Financiero
-          </button>
-        </div>
-
+    <header className="bg-gradient-to-r from-white via-gray-50 to-white shadow-lg sticky top-0 z-50 border-b border-gray-200">
+      <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo con efecto hover */}
         <div className="flex items-center space-x-3">
-          <button className="text-gray-700 hover:text-gray-900 font-medium">
-            Ingresa
-          </button>
-          <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition-colors font-medium">
-            Regístrate →
-          </button>
+          <Link href="/" className="transition-transform hover:scale-105 duration-300">
+            <Image
+              src="/BanorteLogoPNG.png"
+              alt="BanorteLogo"
+              width={200}
+              height={140}
+              priority
+              className="drop-shadow-md"
+            />
+          </Link>
         </div>
-      </div>
-    </nav>
+
+        {/* Navigation con efectos mejorados */}
+        <div className="flex space-x-2">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <button
+                  className={`
+                    px-6 py-2.5 rounded-full font-semibold 
+                    transition-all duration-300 
+                    transform hover:scale-105
+                    shadow-md hover:shadow-lg
+                    ${
+                      isActive
+                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-red-200"
+                        : "bg-white text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 border border-gray-200"
+                    }
+                  `}
+                >
+                  {item.label}
+                </button>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Login Button mejorado */}
+        <div className="flex items-center space-x-3">
+          <Link href="/login">
+            <button className="
+              bg-gradient-to-r from-red-600 to-red-700 
+              text-white px-8 py-2.5 rounded-full 
+              hover:from-red-700 hover:to-red-800 
+              transition-all duration-300 
+              font-semibold 
+              shadow-lg hover:shadow-xl 
+              transform hover:scale-105
+              hover:shadow-red-200
+            ">
+              Salir →
+            </button>
+          </Link>
+        </div>
+      </nav>
+    </header>
   );
 }

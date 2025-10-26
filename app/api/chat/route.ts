@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const prompt =
       typeof body?.prompt === 'string' ? body.prompt.trim() : '';
-    const userId = '1';
+    const userId = '2';
 
     if (!prompt) {
       return NextResponse.json(
